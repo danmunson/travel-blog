@@ -5,8 +5,8 @@ import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 import Image from 'next/image';
 import Button from '@mui/material/Button';
-import { ArticleItem, ImageData } from '../lib/types';
-import {EditableExpandedImageModal} from './Modals';
+import { ArticleItem, EditState, ImageData } from '../lib/types';
+import {ControlPanel, EditableExpandedImageModal} from './Modals';
 import { ButtonGroup, Modal } from '@mui/material';
 import {v4 as uuid} from 'uuid';
 
@@ -33,8 +33,31 @@ export function NewParagraph(item: ParagraphItem) {
     );
 }
 
-function UploadButton(setValue: (imageData: ImageData[]) => void) {
-    const inputRef = React.useRef(null);
+function UploadButton(
+    item: ArticleItem,
+    inputRef: React.MutableRefObject<any>,
+    itemIdRef: React.MutableRefObject<string|null>,
+) {
+    return (<>
+        <Button
+            variant="outlined"
+            onClick={() => {
+                itemIdRef.current = item.id;
+                // "click" the input
+                console.log('upload for', itemIdRef!.current);
+                inputRef!.current?.click();
+            }}
+        >
+            Upload
+        </Button>
+    </>);
+}
+
+function HiddenImageInput(
+    inputRef: React.MutableRefObject<any>,
+    itemIdRef: React.MutableRefObject<string|null>,
+    handleImages: (id: string, imageData: ImageData[]) => void
+) {
     return (<>
         <input
             type="file"
@@ -59,54 +82,32 @@ function UploadButton(setValue: (imageData: ImageData[]) => void) {
                     }
                 }
                 if (fileData.length) {
-                    setValue(fileData);
+                    const id = itemIdRef.current!;
+                    handleImages(id, fileData);
                 }
             }}
-        ></input>
-        <Button
-            variant="outlined"
-            onClick={() => {
-                // "click" the input
-                console.log('CLICKING', inputRef.current);
-                (inputRef.current as any)?.click();
-            }}
-        >
-            Upload
-        </Button>
+        />
     </>);
 }
 
 const MemoizedImage = React.memo(Image);
 
-export function MasonryImageListUpload(item: SlideshowItem) {
-    const [imageData, _setImageData] = React.useState([] as ImageData[]);
-
-    const setImageData = (imageData: ImageData[]) => {
-        item.images = imageData;
-        _setImageData(item.images);
-    }
-
-    const addMore = (moreImageData: ImageData[]) => {
-        const allImageData = imageData.concat(moreImageData);
-        setImageData(allImageData);
-    }
-
-    const removeImage = (imageUrl: string) => {
-        const allImageData = imageData.filter((image) => image.url !== imageUrl);
-        setImageData(allImageData);
-    };
-
-    const [expandedImage, setExpandedImage] = React.useState(null as ImageData|null);
-    const onExpandedImageClose = () => setExpandedImage(null);
-
+export function MasonryImageListUpload(
+    item: SlideshowItem,
+    setExpandedImage: (imageData: ImageData) => void,
+    inputRef: React.MutableRefObject<any>,
+    itemIdRef: React.MutableRefObject<string|null>,
+) {
     return (<>
         <Box sx={{ width: 500, height: 450, overflowY: 'scroll' }}>
             <ImageList variant="masonry" cols={3} gap={8}>
-                {imageData.map((image) => (
+                {item.images.map((image) => (
                     <ImageListItem key={image.url} onClick={() => setExpandedImage(image)}>
                         <MemoizedImage
-                            src={`${image.url}?w=248&fit=crop&auto=format`}
-                            // srcSet={`${item.img}?w=248&fit=crop&auto=format&dpr=2 2x`}
+                            src={image.url}
+                            width={'300px'}
+                            height={'300px'}
+                            // layout={'responsive'}
                             alt={image.name}
                             loading="lazy"
                         />
@@ -114,8 +115,7 @@ export function MasonryImageListUpload(item: SlideshowItem) {
                 ))}
             </ImageList>
         </Box>
-        {EditableExpandedImageModal(expandedImage, onExpandedImageClose, removeImage)}
-        {UploadButton(addMore)}
+        {UploadButton(item, inputRef, itemIdRef)}
     </>);
 }
 
@@ -125,17 +125,15 @@ type Controls = {
     deleteItem: (id: string) => void;
     moveUpwards: (id: string) => void;
     moveDownwards: (id: string) => void;
+    addImages: (id: string, image: ImageData[]) => void;
+    removeImage: (id: string, imageUrl: string) => void;
 };
 
-function insertAtIndex<T>(x: T, arr: T[], index: number) {
-    return arr.slice(0, index).concat([x]).concat(arr.slice(index));
-}
-
 function makeControls(
-    articleState: Record<string, ArticleItem>,
-    articleOrder: string[],
-    setCurrentOrder: (order: string[]) => void,
+    editState: EditState,
+    setCurrentState: (editState: EditState) => void,
 ): Controls {
+    const {articleState, articleOrder} = editState;
     return {
         insertNewParagraph: () => {
             // adds paragraph to end of article
@@ -143,7 +141,8 @@ function makeControls(
             const item: ParagraphItem = {id, paragraph: '', type: 'paragraph'};
             articleState[id] = item;
             articleOrder.push(id);
-            setCurrentOrder(articleOrder);
+            console.log(articleState);
+            setCurrentState({articleState, articleOrder});
         },
 
         insertNewImageSet: () => {
@@ -152,12 +151,13 @@ function makeControls(
             const item: SlideshowItem = {id, images: [], type: 'slideshow'};
             articleState[id] = item;
             articleOrder.push(id);
+            setCurrentState({articleState, articleOrder});
         },
 
         deleteItem: (idToDelete: string) => {
             delete articleState[idToDelete];
             const newOrder = articleOrder.filter((x) => x !== idToDelete);
-            setCurrentOrder(newOrder);
+            setCurrentState({articleState, articleOrder: newOrder});
         },
 
         moveUpwards: (idOfCallingItem: string) => {
@@ -168,6 +168,7 @@ function makeControls(
                 articleOrder[targetIdx] = temp;
                 articleOrder[targetIdx - 1] = targetId;
             }
+            setCurrentState({articleState, articleOrder});
         },
 
         moveDownwards: (idOfCallingItem: string) => {
@@ -178,68 +179,89 @@ function makeControls(
                 articleOrder[targetIdx] = temp;
                 articleOrder[targetIdx + 1] = targetId;
             }
+            setCurrentState({articleState, articleOrder});
+        },
+
+        addImages: (idOfCallingItem: string, images: ImageData[]) => {
+            const item = articleState[idOfCallingItem] as SlideshowItem;
+            item.images = item.images.concat(images);
+            setCurrentState({articleState, articleOrder});
+        },
+
+        removeImage: (idOfCallingItem: string, imageUrl: string) => {
+            const item = articleState[idOfCallingItem] as SlideshowItem;
+            item.images = item.images.filter((image) => image.url !== imageUrl);
+            setCurrentState({articleState, articleOrder});
         },
     };
 }
 
 function ElementWithControls<T extends {id: string}>(
     item: T,
-    elementFactory: (item: T) => JSX.Element,
-    deleteItem: (id: string) => void,
-    moveUpwards: (id: string) => void,
-    moveDownwards: (id: string) => void
+    element: JSX.Element,
+    openControls: (item: T) => void,
 ) {
-    const [open, setOpen] = React.useState(false);
-
-    // new paragraphs/images always go below
-    const element = elementFactory(item);
-
     return (
         <Box>
             {element}
-            <Button onClick={() => setOpen(true)}>Edit</Button>
-            <Modal
-                open={open}
-                onClose={() => setOpen(false)}
-            >
-                <ButtonGroup>
-                    <Button onClick={() => deleteItem(item.id)}>Delete</Button>
-                    <Button onClick={() => moveUpwards(item.id)}>Move Upwards</Button>
-                    <Button onClick={() => moveDownwards(item.id)}>Move Downwards</Button>
-                </ButtonGroup>
-            </Modal>
-            
+            <Button onClick={() => openControls(item)}>Edit</Button>
         </Box>
     );
 };
 
-export function ContentCreationGroup(
-    articleState: Record<string, ArticleItem>,
-    initialOrder: string[],
-    upload: (ordering: string[]) => void,
-) {
-    const [currentOrder, setCurrentOrder] = React.useState(initialOrder.slice());
 
-    const controls = makeControls(articleState, currentOrder, setCurrentOrder);
-    const {insertNewParagraph, insertNewImageSet, deleteItem, moveUpwards, moveDownwards} = controls;
+
+export function ContentCreationGroup(
+    editState: EditState,
+    updateEditState: (editState: EditState) => void,
+    upload: (editState: EditState) => void,
+) {
+    console.log('editState', editState);
+
+    const [selectedItem, setSelectedItem] = React.useState(null as ArticleItem|null);
+
+    const [selectedImage, setSelectedImage] = React.useState(
+        null as {id: string, image: ImageData}|null
+    );
+
+    const imageInputRef = React.useRef(null as any);
+    const imageItemIdRef = React.useRef(null as string|null);
+
+    const controls = makeControls(
+        editState,
+        (editState: EditState) => {
+            const {articleState, articleOrder} = editState;
+            updateEditState({articleState, articleOrder: articleOrder.slice()});
+        }
+    );
+    const {
+        insertNewParagraph,
+        insertNewImageSet,
+        deleteItem,
+        moveUpwards,
+        moveDownwards,
+        addImages,
+        removeImage,
+    } = controls;
 
     const mapContentToComponent = (item: ArticleItem) => {
         const type = item.type;
         if (type === 'paragraph') {
             return ElementWithControls(
                 item,
-                NewParagraph,
-                deleteItem,
-                moveUpwards,
-                moveDownwards,
+                NewParagraph(item),
+                setSelectedItem
             );
         } else if (type === 'slideshow') {
             return ElementWithControls(
                 item,
-                MasonryImageListUpload,
-                deleteItem,
-                moveUpwards,
-                moveDownwards,
+                MasonryImageListUpload(
+                    item,
+                    (image: ImageData) => setSelectedImage({id: item.id, image}),
+                    imageInputRef,
+                    imageItemIdRef,
+                ),
+                setSelectedItem
             );
         }
         // TODO: video
@@ -247,14 +269,37 @@ export function ContentCreationGroup(
 
     return (
         <div>
-            {currentOrder.map((itemId) => articleState[itemId]).map((item) => {
+            {editState.articleOrder.map((itemId) => editState.articleState[itemId]).map((item) => {
                 return <div key={item.id}>{mapContentToComponent(item)}</div>;
             })}
             <ButtonGroup>
                 <Button onClick={() => insertNewParagraph()}>New Paragraph</Button>
                 <Button onClick={() => insertNewImageSet()}>New Slideshow</Button>
-                <Button onClick={() => upload(currentOrder)}>Upload</Button>
+                <Button onClick={() => upload(editState)}>Upload</Button>
             </ButtonGroup>
+            {
+                ControlPanel(
+                    selectedItem,
+                    () => setSelectedItem(null),
+                    deleteItem,
+                    moveUpwards,
+                    moveDownwards,
+                )
+            }
+            {
+                EditableExpandedImageModal(
+                    selectedImage?.image,
+                    () => setSelectedImage(null),
+                    (url: string) => removeImage(selectedImage!.id, url),
+                )
+            }
+            {
+                HiddenImageInput(
+                    imageInputRef,
+                    imageItemIdRef,
+                    addImages,
+                )
+            }
         </div>
     );
 

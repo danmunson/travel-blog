@@ -24,3 +24,9 @@ export type ArticleItem = (Paragraph|Slideshow|Video) & {id: string};
 export type ArticleContent = Array<ArticleItem>;
 
 export type ArticleStatusActions = 'new'|'publish'|'unpublish'|'delete';
+
+export type EditState = {
+    articleState: Record<string, ArticleItem>;
+    articleOrder: string[];
+};
+

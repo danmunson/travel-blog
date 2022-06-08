@@ -22,7 +22,12 @@ export function getAdminFileCopy(): AdminFile {
 }
 
 function writeAdminFile(newAdminFile: AdminFile) {
-    writeFileSync(AdminFilePath, JSON.stringify(newAdminFile));
+    writeFileSync(AdminFilePath, JSON.stringify(newAdminFile, null, 4));
+}
+
+function writeContentFile(filename: string, content: ArticleContent) {
+    const path = join(ContentDirectory, filename);
+    writeFileSync(path, JSON.stringify(content, null, 4));
 }
 
 export function getArticleContent(filename: string): ArticleContent {
@@ -38,12 +43,16 @@ export function newArticle(title: string) {
         throw new Error('Title is not unique');
     }
 
-    adminFile.articles.push({
+    const article = {
         title,
         createdTime: Date.now(),
         published: false,
         filename: filenameFromTitle(title)
-    });
+    };
+    writeContentFile(article.filename, []);
+
+    adminFile.articles.push(article);
+    writeAdminFile(adminFile);
 
     return;
 }

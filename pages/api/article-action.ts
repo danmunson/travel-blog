@@ -16,16 +16,24 @@ function setPublishStatus(title: string, status: 'publish'|'unpublish') {
 }
 
 async function articleActions(req: NextApiRequest, res: NextApiResponse) {
+    console.log(req.body, req.session.isLoggedIn);
     if (req.session.isLoggedIn) {
         const {title, action} = req.body as {title: string, action: ArticleStatusActions};
         if (action === 'new') {
             newArticle(title);
+            res.status(200);
         } else if (action === 'delete') {
             deleteArticle(title);
+            res.status(200);
         } else if (action === 'publish' || action === 'unpublish') {
             setPublishStatus(title, action);
+            res.status(200);
+        } else {
+            res.status(401).json({message: 'Not authorized'})
         }
+        res.end()
     } else {
         res.status(401).json({message: 'Not authorized'})
+        res.end()
     }
 }

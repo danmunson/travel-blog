@@ -2,8 +2,9 @@ import { withIronSessionSsr } from 'iron-session/next';
 import { sessionOptions } from '../lib/session';
 import { getAdminFileCopy, getArticleContent } from '../lib/fsutils';
 import { InferGetServerSidePropsType, NextPage } from 'next';
-import { ArticleAdminFull, ArticleContent, ArticleItem, ImageData } from '../lib/types';
-import { NewParagraph, MasonryImageListUpload } from '../components/EditableComponents';
+import { ArticleAdminFull, ArticleContent, ArticleItem, EditState, ImageData } from '../lib/types';
+import { ContentCreationGroup } from '../components/EditableComponents';
+import React from 'react';
 
 const EditPage: NextPage<any, any> = ({articleSummary, articleContent}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
     // if new article, start with a blank slate
@@ -24,20 +25,31 @@ const EditPage: NextPage<any, any> = ({articleSummary, articleContent}: InferGet
         // TODO: video
     }
 
-    const uploadUpdatedArticle = (currentOrder: string[]) => {
-        const newArticle = currentOrder.map((id) => articleState[id]);
+    const initialEditState: EditState = {
+        articleState,
+        articleOrder: initialOrder
+    };
+    const [currentEditState, updateEditState] = React.useState(initialEditState);
+
+    const uploadUpdatedArticle = (editState: EditState) => {
+        const {articleState, articleOrder} = editState;
+        const newArticle = articleOrder.map((id) => articleState[id]);
         console.log(newArticle);
     };
 
+    console.log('OUTER');
+
     return (<>
         <h1>{articleSummary.title}</h1>
-        {}
+        {ContentCreationGroup(currentEditState, updateEditState, uploadUpdatedArticle)}
     </>);
 };
 
 export default EditPage;
 
-export const getServerSideProps = withIronSessionSsr(async ({req, res, params}) => {
+export const getServerSideProps = withIronSessionSsr(async ({req, res, query}) => {
+    console.log('BACKEND')
+
     const isLoggedIn = req.session.isLoggedIn || false;
     if (!isLoggedIn) {
         res.setHeader('location', '/login');
@@ -54,9 +66,9 @@ export const getServerSideProps = withIronSessionSsr(async ({req, res, params}) 
         }};
     };
 
-    if (!params) return raise404();
+    if (!query) return raise404();
 
-    const {title} = params!;
+    const {title} = query!;
 
     const {articles} = getAdminFileCopy();
     const articleSummary: ArticleAdminFull|undefined = articles.find(data => data.title === title);

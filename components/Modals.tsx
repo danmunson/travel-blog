@@ -1,7 +1,7 @@
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import { Button, ButtonGroup, TextField, Typography } from '@mui/material';
-import { ArticleAdminSummary, ArticleStatusActions, ImageData } from '../lib/types';
+import { ArticleAdminSummary, ArticleItem, ArticleStatusActions, ImageData } from '../lib/types';
 import React from 'react';
 import { takeArticleAction, editArticleRedirect } from '../lib/endpoints';
 import Image from 'next/image';
@@ -62,17 +62,17 @@ export function NewArticleModal(
     submitNewArticle: (title: string) => void,
 ) {
     const [open, setOpen] = React.useState(false);
-    const [title, setTitle] = React.useState(null as string|null);
+    const title = React.useRef('');
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setTitle(event.target.value);
+        title.current = event.target.value;
     };
 
     return (<>
         <Button onClick={() => setOpen(true)}>New Article</Button>
         <Modal
             open={open}
-            onClose={close}
+            onClose={() => setOpen(false)}
         >
             <Box>
                 <Typography id="modal-modal-title" variant="h6" component="h2">Title</Typography>
@@ -83,10 +83,9 @@ export function NewArticleModal(
                     onChange={handleChange}
                 />
                 <ButtonGroup variant="outlined" aria-label="outlined button group">
-                    <Button onClick={() => setOpen(false)}>Cancel</Button>
                     <Button onClick={() => {
-                        if (title && title.length >= 1) {
-                            submitNewArticle(title);
+                        if (title.current && title.current.length >= 1) {
+                            submitNewArticle(title.current);
                         }
                     }}>
                         Create
@@ -116,8 +115,12 @@ export function ExpandedImageModal(image: ImageData|null, close: () => void) {
     );
 }
 
-export function EditableExpandedImageModal(image: ImageData|null, closeFn: () => void, deleteFn: (url: string) => void) {
-    const open = image !== null; // check if image is just {}
+export function EditableExpandedImageModal(
+    image: ImageData|undefined,
+    closeFn: () => void,
+    deleteFn: (url: string) => void
+) {
+    const open = !!image;
     if (!open) return <></>;
 
     const removeImage = () => deleteFn(image.url);
@@ -130,10 +133,37 @@ export function EditableExpandedImageModal(image: ImageData|null, closeFn: () =>
                 <Image
                     src={image.url}
                     alt={image.name}
+                    width={'500px'}
+                    height={'500px'}
                     loading="lazy"
                 />
                 <Button onClick={removeImage}>Delete</Button>
             </Box>
         </Modal>
+    );
+}
+
+export function ControlPanel(
+    item: ArticleItem|null,
+    onClose: () => void,
+    deleteItem: (id: string) => void,
+    moveUpwards: (id: string) => void,
+    moveDownwards: (id: string) => void,
+) {
+    const open = !!item;
+    if (!open) return <></>;
+    return (
+        <Box>
+            <Modal
+                open={open}
+                onClose={onClose}
+            >
+                <ButtonGroup>
+                    <Button onClick={() => deleteItem(item.id)}>Delete</Button>
+                    <Button onClick={() => moveUpwards(item.id)}>Move Upwards</Button>
+                    <Button onClick={() => moveDownwards(item.id)}>Move Downwards</Button>
+                </ButtonGroup>
+            </Modal>
+        </Box>
     );
 }
