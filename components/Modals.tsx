@@ -3,7 +3,7 @@ import Box from '@mui/material/Box';
 import { Button, ButtonGroup, TextField, Typography } from '@mui/material';
 import { ArticleAdminSummary, ArticleItem, ArticleStatusActions, ImageData } from '../lib/types';
 import React from 'react';
-import { takeArticleAction, editArticleRedirect } from '../lib/endpoints';
+import { takeArticleAction, editArticleRedirect, adminRedirect } from '../lib/endpoints';
 import Image from 'next/image';
 
 type PendingActionType = {action: ArticleStatusActions|null, title: string};
@@ -50,7 +50,12 @@ export function ActionModal(
                 <DoubleCheck 
                     action={pendingAction}
                     title={title}
-                    sayYes={() => takeArticleAction(title, pendingAction!)}
+                    sayYes={async () => {
+                        await takeArticleAction(title, pendingAction!);
+                        setPendingAction(null);
+                        close();
+                        adminRedirect();
+                    }}
                     sayNo={() => setPendingAction(null)}
                 />
             </Box>
