@@ -43,8 +43,6 @@ function UploadButton(
             variant="outlined"
             onClick={() => {
                 itemIdRef.current = item.id;
-                // "click" the input
-                console.log('upload for', itemIdRef!.current);
                 inputRef!.current?.click();
             }}
         >
@@ -141,7 +139,6 @@ function makeControls(
             const item: ParagraphItem = {id, paragraph: '', type: 'paragraph'};
             articleState[id] = item;
             articleOrder.push(id);
-            console.log(articleState);
             setCurrentState({articleState, articleOrder});
         },
 
@@ -191,6 +188,7 @@ function makeControls(
         removeImage: (idOfCallingItem: string, imageUrl: string) => {
             const item = articleState[idOfCallingItem] as SlideshowItem;
             item.images = item.images.filter((image) => image.url !== imageUrl);
+            URL.revokeObjectURL(imageUrl);
             setCurrentState({articleState, articleOrder});
         },
     };
@@ -216,8 +214,6 @@ export function ContentCreationGroup(
     updateEditState: (editState: EditState) => void,
     upload: (editState: EditState) => void,
 ) {
-    console.log('editState', editState);
-
     const [selectedItem, setSelectedItem] = React.useState(null as ArticleItem|null);
 
     const [selectedImage, setSelectedImage] = React.useState(

@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from "fs";
+import { readFileSync, writeFileSync, renameSync } from "fs";
 import {join} from 'path';
 import { AdminFile, ArticleAdminSummary, ArticleContent } from "./types";
 import { createHash } from "crypto";
@@ -6,6 +6,7 @@ import { createHash } from "crypto";
 const {DATA_DIRECTORY} = process.env;
 const AdminFilePath = join(DATA_DIRECTORY!, 'admin.json');
 const ContentDirectory = join(DATA_DIRECTORY!, 'content');
+const MediaDirectory = join(DATA_DIRECTORY!, 'media');
 
 function filenameFromTitle(title: string) {
     const hash = createHash('md5').update(title).digest('hex').toString();
@@ -25,7 +26,7 @@ function writeAdminFile(newAdminFile: AdminFile) {
     writeFileSync(AdminFilePath, JSON.stringify(newAdminFile, null, 4));
 }
 
-function writeContentFile(filename: string, content: ArticleContent) {
+export function writeContentFile(filename: string, content: ArticleContent) {
     const path = join(ContentDirectory, filename);
     writeFileSync(path, JSON.stringify(content, null, 4));
 }
@@ -74,4 +75,13 @@ export function updateArticleMetadata(title: string, updateProps: Partial<Articl
     }
     Object.assign(article, updateProps);
     writeAdminFile(adminFile);
+}
+
+export function saveMediaFile(currentPath: string, filename: string) {
+    const newPath = join(MediaDirectory, filename);
+    renameSync(currentPath, newPath);
+}
+
+export function readMediaFile(filename: string) {
+    return readFileSync(join(MediaDirectory, filename));
 }

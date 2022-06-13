@@ -5,6 +5,9 @@ import { InferGetServerSidePropsType, NextPage } from 'next';
 import { ArticleAdminFull, ArticleContent, ArticleItem, EditState, ImageData } from '../lib/types';
 import { ContentCreationGroup } from '../components/EditableComponents';
 import React from 'react';
+import { adminRedirect, uniqueImageId, uploadArticle } from '../lib/endpoints';
+import { UploadProgressDisplay } from '../components/Modals';
+import deepcopy from 'deepcopy';
 
 const EditPage: NextPage<any, any> = ({articleSummary, articleContent}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
     // if new article, start with a blank slate
@@ -14,16 +17,36 @@ const EditPage: NextPage<any, any> = ({articleSummary, articleContent}: InferGet
     const initialOrder: string[] = [];
 
     for (const item of articleContent) {
-        articleState[item.id] = item;
+        articleState[item.id] = deepcopy(item);
         initialOrder.push(item.id);
 
         if (item.type === 'slideshow') {
-            item.images.forEach((image) => {
-                existingMediaFiles.add(image.name + image.size.toString());
-            })
+            for (const image of item.images) existingMediaFiles.add(uniqueImageId(image));
         }
         // TODO: video
     }
+
+    const shouldSkipUpload = (image: ImageData) => existingMediaFiles.has(uniqueImageId(image));
+
+    const [uploadStatus, setUploadStatus] = React.useState(0);
+
+    const uploadUpdatedArticle = async (editState: EditState) => {
+        const {articleState, articleOrder} = editState;
+        const newArticle = articleOrder.map((id) => articleState[id]);
+
+        try {
+            await uploadArticle(
+                articleSummary,
+                newArticle,
+                shouldSkipUpload,
+                (pct: number) => setUploadStatus(pct)
+            );
+            adminRedirect();
+        } catch (error) {
+            console.error(error);
+            setUploadStatus(0);
+        }
+    };
 
     const initialEditState: EditState = {
         articleState,
@@ -31,24 +54,16 @@ const EditPage: NextPage<any, any> = ({articleSummary, articleContent}: InferGet
     };
     const [currentEditState, updateEditState] = React.useState(initialEditState);
 
-    const uploadUpdatedArticle = (editState: EditState) => {
-        const {articleState, articleOrder} = editState;
-        const newArticle = articleOrder.map((id) => articleState[id]);
-        console.log(newArticle);
-    };
-
-    console.log('OUTER');
-
     return (<>
         <h1>{articleSummary.title}</h1>
         {ContentCreationGroup(currentEditState, updateEditState, uploadUpdatedArticle)}
+        {UploadProgressDisplay(uploadStatus)}
     </>);
 };
 
 export default EditPage;
 
 export const getServerSideProps = withIronSessionSsr(async ({req, res, query}) => {
-    console.log('BACKEND')
 
     const isLoggedIn = req.session.isLoggedIn || false;
     if (!isLoggedIn) {

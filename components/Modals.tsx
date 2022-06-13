@@ -167,3 +167,11 @@ export function ControlPanel(
         </Box>
     );
 }
+
+export function UploadProgressDisplay(uploadProgress: number) {
+    return (
+        <Modal open={uploadProgress > 0}>
+            <h1>{`Progress: ${uploadProgress}`}</h1>
+        </Modal>
+    );
+}

@@ -16,7 +16,6 @@ function setPublishStatus(title: string, status: 'publish'|'unpublish') {
 }
 
 async function articleActions(req: NextApiRequest, res: NextApiResponse) {
-    console.log(req.body, req.session.isLoggedIn);
     if (req.session.isLoggedIn) {
         const {title, action} = req.body as {title: string, action: ArticleStatusActions};
         if (action === 'new') {
