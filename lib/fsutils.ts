@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync, renameSync } from "fs";
 import {join} from 'path';
-import { AdminFile, ArticleAdminSummary, ArticleContent } from "./types";
+import { AdminFile, ArticleAdminFull, ArticleAdminSummary, ArticleContent, CombinedArticle } from "./types";
 import { createHash } from "crypto";
 
 const {DATA_DIRECTORY} = process.env;
@@ -55,6 +55,7 @@ export function newArticle(title: string) {
     adminFile.articles.push(article);
     writeAdminFile(adminFile);
 
+    ReadOnlyDb.build();
     return;
 }
 
@@ -65,6 +66,8 @@ export function deleteArticleMetadata(title: string) {
     }
     adminFile.articles = adminFile.articles.filter(article => article.title !== title);
     writeAdminFile(adminFile);
+
+    ReadOnlyDb.build();
 }
 
 export function updateArticleMetadata(title: string, updateProps: Partial<ArticleAdminSummary>) {
@@ -75,6 +78,8 @@ export function updateArticleMetadata(title: string, updateProps: Partial<Articl
     }
     Object.assign(article, updateProps);
     writeAdminFile(adminFile);
+
+    ReadOnlyDb.build();
 }
 
 export function saveMediaFile(currentPath: string, filename: string) {
@@ -85,3 +90,41 @@ export function saveMediaFile(currentPath: string, filename: string) {
 export function readMediaFile(filename: string) {
     return readFileSync(join(MediaDirectory, filename));
 }
+
+class ReadOnlyArticleDb {
+    private articles!: Map<string, ArticleAdminFull>;
+    private content!: Map<string, ArticleContent>
+    
+    constructor() {
+        this.build();
+    }
+
+    public build() {
+        this.articles = new Map();
+        this.content = new Map();
+        const adminFile = getAdminFileCopy();
+        for (const item of adminFile.articles) {
+            this.articles.set(item.title, item);
+            const content = getArticleContent(item.filename);
+            this.content.set(item.title, content);
+        }
+    }
+
+    hasArticle(title: string) {
+        return this.articles.has(title) && this.content.has(title);
+    }
+    
+    getPublishedArticleSummaries() {
+        const allArticles = [...this.articles.values()];
+        return allArticles.filter((item) => item.published);
+    }
+
+    getArticle(title: string): CombinedArticle {
+        if (!this.hasArticle(title)) throw new Error(`No such article ${title}`);
+        const summary = this.articles.get(title)!;
+        const content = this.content.get(title)!;
+        return {...summary, content};
+    }
+}
+
+export const ReadOnlyDb = new ReadOnlyArticleDb();

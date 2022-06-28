@@ -19,6 +19,14 @@ export function adminRedirect() {
     Router.push('/admin');
 }
 
+export function goToArticle(title: string) {
+    Router.push(`/article?title=${title}`);
+}
+
+export function goHome() {
+    Router.push('/');
+}
+
 export function uniqueImageId(image: ImageData){ 
     return `${image.size.toString()}-${image.name}`;
 }

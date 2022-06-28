@@ -1,10 +1,11 @@
+/* eslint-disable @next/next/no-img-element */
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
-import { Button, ButtonGroup, TextField, Typography } from '@mui/material';
+import { Button, ButtonGroup, SxProps, TextField, Typography } from '@mui/material';
 import { ArticleAdminSummary, ArticleItem, ArticleStatusActions, ImageData } from '../lib/types';
 import React from 'react';
 import { takeArticleAction, editArticleRedirect, adminRedirect } from '../lib/endpoints';
-import Image from 'next/image';
+import { BasicImage, EmptyDiv } from './basics';
 
 type PendingActionType = {action: ArticleStatusActions|null, title: string};
 
@@ -101,6 +102,29 @@ export function NewArticleModal(
     </>);
 }
 
+const modalStyles: SxProps = {
+    margin: 'auto',
+    width: '80%',
+    height: '80%',
+};
+
+const boxStyles: SxProps = {
+    justifyItems: 'center',
+    alignItems: 'center',
+    alignContent: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+};
+
+const imageStyles = {
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    // margin: 'auto',
+    display:'block',
+};
+
 export function ExpandedImageModal(image: ImageData|null, close: () => void) {
     const open = image !== null; // check if image is just {}
     if (!open) return <></>;
@@ -108,13 +132,12 @@ export function ExpandedImageModal(image: ImageData|null, close: () => void) {
         <Modal
             open={open}
             onClose={close}
+            sx={modalStyles}
         >
-            <Box>
-                <Image
-                    src={image.url}
-                    alt={image.name}
-                    loading="lazy"
-                />
+            <Box sx={boxStyles}>
+                <EmptyDiv sx={boxStyles}>
+                    <BasicImage style={imageStyles} image={image} width={'500px'}/>
+                </EmptyDiv>
             </Box>
         </Modal>
     );
@@ -133,16 +156,13 @@ export function EditableExpandedImageModal(
         <Modal
             open={open}
             onClose={closeFn}
+            sx={modalStyles}
         >
-            <Box>
-                <Image
-                    src={image.url}
-                    alt={image.name}
-                    width={'500px'}
-                    height={'500px'}
-                    loading="lazy"
-                />
-                <Button onClick={removeImage}>Delete</Button>
+            <Box sx={boxStyles}>
+                <EmptyDiv sx={boxStyles}>
+                    <BasicImage style={imageStyles} image={image} width={'500px'}/>
+                    <Button onClick={removeImage}>Delete</Button>
+                </EmptyDiv>
             </Box>
         </Modal>
     );

@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import * as React from 'react';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
@@ -9,6 +10,7 @@ import { ArticleItem, EditState, ImageData } from '../lib/types';
 import {ControlPanel, EditableExpandedImageModal} from './Modals';
 import { ButtonGroup, Modal } from '@mui/material';
 import {v4 as uuid} from 'uuid';
+import { ClickableImage } from './basics';
 
 type ParagraphItem = ArticleItem & {type: 'paragraph'};
 type SlideshowItem = ArticleItem & {type: 'slideshow'};
@@ -88,7 +90,7 @@ function HiddenImageInput(
     </>);
 }
 
-const MemoizedImage = React.memo(Image);
+const MemoizedImageListItem = React.memo(ImageListItem);
 
 export function MasonryImageListUpload(
     item: SlideshowItem,
@@ -100,16 +102,12 @@ export function MasonryImageListUpload(
         <Box sx={{ width: 500, height: 450, overflowY: 'scroll' }}>
             <ImageList variant="masonry" cols={3} gap={8}>
                 {item.images.map((image) => (
-                    <ImageListItem key={image.url} onClick={() => setExpandedImage(image)}>
-                        <MemoizedImage
-                            src={image.url}
-                            width={'300px'}
-                            height={'300px'}
-                            // layout={'responsive'}
-                            alt={image.name}
-                            loading="lazy"
+                    <MemoizedImageListItem key={image.url} onClick={() => setExpandedImage(image)}>
+                        <ClickableImage
+                            image={image}
+                            width={'250px'}
                         />
-                    </ImageListItem>
+                    </MemoizedImageListItem>
                 ))}
             </ImageList>
         </Box>

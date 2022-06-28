@@ -30,3 +30,4 @@ export type EditState = {
     articleOrder: string[];
 };
 
+export type CombinedArticle = ArticleAdminFull & {content: ArticleContent};
