@@ -36,7 +36,7 @@ export function ArticleTable(
                     {articleDetails.map(({ title, createdAt, status, data }) => (
                         <TableRow
                             key={title}
-                            sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                            sx={{ '&:last-child td, &:last-child th': { border: 0 }, cursor: 'pointer' }}
                             onClick={() => {
                                 selectArticle(data);
                             }}

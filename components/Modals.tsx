@@ -1,11 +1,11 @@
 /* eslint-disable @next/next/no-img-element */
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
-import { Button, ButtonGroup, SxProps, TextField, Typography } from '@mui/material';
+import { Button, ButtonGroup, Stack, TextField, Typography } from '@mui/material';
 import { ArticleAdminSummary, ArticleItem, ArticleStatusActions, ImageData } from '../lib/types';
 import React from 'react';
 import { takeArticleAction, editArticleRedirect, adminRedirect } from '../lib/endpoints';
-import { BasicImage, EmptyDiv } from './basics';
+import { BasicImage, EmptyDiv, BasicStyledModal, BasicStyledBox, CenteredContentsStyle } from './basics';
 
 type PendingActionType = {action: ArticleStatusActions|null, title: string};
 
@@ -37,30 +37,32 @@ export function ActionModal(
     const {title, published} = article;
     const publishAction = published ? 'unpublish' : 'publish';
     return (
-        <Modal
+        <BasicStyledModal
             open={!!title}
             onClose={close}
         >
-            <Box>
-                <Typography id="modal-modal-title" variant="h6" component="h2">Options</Typography>
-                <ButtonGroup variant="outlined" aria-label="outlined button group">
-                    <Button onClick={() => editArticleRedirect(title)}>Edit</Button>
-                    <Button onClick={() => setPendingAction(publishAction)}>{publishAction}</Button>
-                    <Button onClick={() => setPendingAction('delete')}>Delete</Button>
-                </ButtonGroup>
-                <DoubleCheck 
-                    action={pendingAction}
-                    title={title}
-                    sayYes={async () => {
-                        await takeArticleAction(title, pendingAction!);
-                        setPendingAction(null);
-                        close();
-                        adminRedirect();
-                    }}
-                    sayNo={() => setPendingAction(null)}
-                />
-            </Box>
-        </Modal>
+            <BasicStyledBox sx={{backgroundColor: 'white'}}>
+                <Stack spacing={4} sx={{justifyItems: 'center'}}>
+                    <Typography id="modal-modal-title" variant="h6" component="h2">{`Actions for "${title}"`}</Typography>
+                    <ButtonGroup variant="outlined" aria-label="outlined button group">
+                        <Button onClick={() => editArticleRedirect(title)}>Edit</Button>
+                        <Button onClick={() => setPendingAction(publishAction)}>{publishAction}</Button>
+                        <Button onClick={() => setPendingAction('delete')}>Delete</Button>
+                    </ButtonGroup>
+                    <DoubleCheck 
+                        action={pendingAction}
+                        title={title}
+                        sayYes={async () => {
+                            await takeArticleAction(title, pendingAction!);
+                            setPendingAction(null);
+                            close();
+                            adminRedirect();
+                        }}
+                        sayNo={() => setPendingAction(null)}
+                    />
+                </Stack>
+            </BasicStyledBox>
+        </BasicStyledModal>
     );
 }
 
@@ -76,47 +78,33 @@ export function NewArticleModal(
 
     return (<>
         <Button onClick={() => setOpen(true)}>New Article</Button>
-        <Modal
+        <BasicStyledModal
             open={open}
             onClose={() => setOpen(false)}
         >
-            <Box>
-                <Typography id="modal-modal-title" variant="h6" component="h2">Title</Typography>
-                <TextField
-                    id="outlined-textarea"
-                    label="New Title"
-                    placeholder="New Title"
-                    onChange={handleChange}
-                />
-                <ButtonGroup variant="outlined" aria-label="outlined button group">
-                    <Button onClick={() => {
-                        if (title.current && title.current.length >= 1) {
-                            submitNewArticle(title.current);
-                        }
-                    }}>
-                        Create
-                    </Button>
-                </ButtonGroup>
-            </Box>
-        </Modal>
+            <BasicStyledBox sx={{backgroundColor: 'white'}}>
+                <Stack spacing={4} sx={{justifyItems: 'center'}}>
+                    <Typography id="modal-modal-title" variant="h6" component="h2">Title</Typography>
+                    <TextField
+                        id="outlined-textarea"
+                        label="New Title"
+                        placeholder="New Title"
+                        onChange={handleChange}
+                    />
+                    <ButtonGroup variant="outlined" aria-label="outlined button group">
+                        <Button onClick={() => {
+                            if (title.current && title.current.length >= 1) {
+                                submitNewArticle(title.current);
+                            }
+                        }}>
+                            Create
+                        </Button>
+                    </ButtonGroup>
+                </Stack>
+            </BasicStyledBox>
+        </BasicStyledModal>
     </>);
 }
-
-const modalStyles: SxProps = {
-    margin: 'auto',
-    width: '80%',
-    height: '80%',
-};
-
-const boxStyles: SxProps = {
-    justifyItems: 'center',
-    alignItems: 'center',
-    alignContent: 'center',
-    justifyContent: 'center',
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-};
 
 const imageStyles = {
     marginLeft: 'auto',
@@ -129,17 +117,16 @@ export function ExpandedImageModal(image: ImageData|null, close: () => void) {
     const open = image !== null; // check if image is just {}
     if (!open) return <></>;
     return (
-        <Modal
+        <BasicStyledModal
             open={open}
             onClose={close}
-            sx={modalStyles}
         >
-            <Box sx={boxStyles}>
-                <EmptyDiv sx={boxStyles}>
+            <BasicStyledBox>
+                <EmptyDiv sx={CenteredContentsStyle}>
                     <BasicImage style={imageStyles} image={image} width={'500px'}/>
                 </EmptyDiv>
-            </Box>
-        </Modal>
+            </BasicStyledBox>
+        </BasicStyledModal>
     );
 }
 
@@ -153,18 +140,19 @@ export function EditableExpandedImageModal(
 
     const removeImage = () => deleteFn(image.url);
     return (
-        <Modal
+        <BasicStyledModal
             open={open}
             onClose={closeFn}
-            sx={modalStyles}
         >
-            <Box sx={boxStyles}>
-                <EmptyDiv sx={boxStyles}>
-                    <BasicImage style={imageStyles} image={image} width={'500px'}/>
-                    <Button onClick={removeImage}>Delete</Button>
+            <BasicStyledBox>
+                <EmptyDiv sx={CenteredContentsStyle}>
+                    <Stack spacing={4}>
+                        <BasicImage style={imageStyles} image={image} width={'500px'}/>
+                        <Button onClick={() => {removeImage(); closeFn()}} style={{backgroundColor: 'red'}}>Delete</Button>
+                    </Stack>
                 </EmptyDiv>
-            </Box>
-        </Modal>
+            </BasicStyledBox>
+        </BasicStyledModal>
     );
 }
 
@@ -178,18 +166,18 @@ export function ControlPanel(
     const open = !!item;
     if (!open) return <></>;
     return (
-        <Box>
-            <Modal
-                open={open}
-                onClose={onClose}
-            >
+        <BasicStyledModal
+            open={open}
+            onClose={onClose}
+        >
+            <BasicStyledBox sx={{backgroundColor: 'white', width: '50%', height: '50%'}}>
                 <ButtonGroup>
-                    <Button onClick={() => deleteItem(item.id)}>Delete</Button>
-                    <Button onClick={() => moveUpwards(item.id)}>Move Upwards</Button>
-                    <Button onClick={() => moveDownwards(item.id)}>Move Downwards</Button>
+                    <Button onClick={() => {deleteItem(item.id); onClose()}}>Delete</Button>
+                    <Button onClick={() => {moveUpwards(item.id); onClose()}}>Move Upwards</Button>
+                    <Button onClick={() => {moveDownwards(item.id); onClose()}}>Move Downwards</Button>
                 </ButtonGroup>
-            </Modal>
-        </Box>
+            </BasicStyledBox>
+        </BasicStyledModal>
     );
 }
 

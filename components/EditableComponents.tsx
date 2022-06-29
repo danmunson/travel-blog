@@ -8,9 +8,9 @@ import Image from 'next/image';
 import Button from '@mui/material/Button';
 import { ArticleItem, EditState, ImageData } from '../lib/types';
 import {ControlPanel, EditableExpandedImageModal} from './Modals';
-import { ButtonGroup, Modal } from '@mui/material';
+import { ButtonGroup, Divider, Modal, Stack } from '@mui/material';
 import {v4 as uuid} from 'uuid';
-import { ClickableImage } from './basics';
+import { BasicStyledBox, ClickableImage } from './basics';
 
 type ParagraphItem = ArticleItem & {type: 'paragraph'};
 type SlideshowItem = ArticleItem & {type: 'slideshow'};
@@ -21,7 +21,7 @@ export function NewParagraph(item: ParagraphItem) {
     };
 
     return (
-        <div>
+        <div style={{width: '1000px'}}>
             <TextField
                 id="outlined-textarea"
                 label="New Paragraph"
@@ -30,6 +30,7 @@ export function NewParagraph(item: ParagraphItem) {
                 minRows={2}
                 onChange={handleChange}
                 defaultValue={item.paragraph || ''}
+                fullWidth
             />
         </div>
     );
@@ -99,7 +100,7 @@ export function MasonryImageListUpload(
     itemIdRef: React.MutableRefObject<string|null>,
 ) {
     return (<>
-        <Box sx={{ width: 500, height: 450, overflowY: 'scroll' }}>
+        <Box sx={{ width: 1000, height: 450, overflowY: 'scroll' }}>
             <ImageList variant="masonry" cols={3} gap={8}>
                 {item.images.map((image) => (
                     <MemoizedImageListItem key={image.url} onClick={() => setExpandedImage(image)}>
@@ -168,7 +169,7 @@ function makeControls(
 
         moveDownwards: (idOfCallingItem: string) => {
             const targetIdx = articleOrder.findIndex((x) => x === idOfCallingItem);
-            if (targetIdx && targetIdx < articleOrder.length - 1) {
+            if (targetIdx > -1 && targetIdx < articleOrder.length - 1) {
                 const targetId = articleOrder[targetIdx];
                 const temp = articleOrder[targetIdx + 1];
                 articleOrder[targetIdx] = temp;
@@ -261,11 +262,16 @@ export function ContentCreationGroup(
         // TODO: video
     }
 
-    return (
-        <div>
+    return (<>
+        <Stack 
+            spacing={4}
+            divider={<Divider orientation="horizontal" flexItem />}
+        >
             {editState.articleOrder.map((itemId) => editState.articleState[itemId]).map((item) => {
                 return <div key={item.id}>{mapContentToComponent(item)}</div>;
             })}
+        </Stack>
+        <BasicStyledBox>
             <ButtonGroup>
                 <Button onClick={() => insertNewParagraph()}>New Paragraph</Button>
                 <Button onClick={() => insertNewImageSet()}>New Slideshow</Button>
@@ -294,7 +300,7 @@ export function ContentCreationGroup(
                     addImages,
                 )
             }
-        </div>
-    );
+        </BasicStyledBox>
+    </>);
 
 }

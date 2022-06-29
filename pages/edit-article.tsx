@@ -8,6 +8,8 @@ import React from 'react';
 import { adminRedirect, uniqueImageId, uploadArticle } from '../lib/endpoints';
 import { UploadProgressDisplay } from '../components/Modals';
 import deepcopy from 'deepcopy';
+import { Stack } from '@mui/material';
+import { BasicStyledBox } from '../components/basics';
 
 const EditPage: NextPage<any, any> = ({articleSummary, articleContent}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
     // if new article, start with a blank slate
@@ -54,11 +56,15 @@ const EditPage: NextPage<any, any> = ({articleSummary, articleContent}: InferGet
     };
     const [currentEditState, updateEditState] = React.useState(initialEditState);
 
-    return (<>
-        <h1>{articleSummary.title}</h1>
-        {ContentCreationGroup(currentEditState, updateEditState, uploadUpdatedArticle)}
-        {UploadProgressDisplay(uploadStatus)}
-    </>);
+    return (
+        <BasicStyledBox>
+            <Stack spacing={4}>
+                <h1>{articleSummary.title}</h1>
+                {ContentCreationGroup(currentEditState, updateEditState, uploadUpdatedArticle)}
+                {UploadProgressDisplay(uploadStatus)}
+            </Stack>
+        </BasicStyledBox>
+    );
 };
 
 export default EditPage;
