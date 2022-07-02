@@ -4,7 +4,20 @@ import { ArticleAdminFull } from '../lib/types';
 import { ReadOnlyDb } from '../lib/fsutils';
 
 const HomePage: NextPage<any, any> = ({articles}: {articles: ArticleAdminFull[]}) => {
-    return (<>{HomeView(articles)}</>);
+    return (
+        <div>
+            <style global jsx>{`
+                html,
+                body,
+                body > div:first-child,
+                div#__next,
+                div#__next > div {
+                    height: 100%;
+                }
+            `}</style>
+            {HomeView(articles)}
+        </div>
+    );
 }
 
 export default HomePage;

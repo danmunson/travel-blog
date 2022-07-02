@@ -22,7 +22,7 @@ export const ArticlePage: NextPage<any, any> = ({article}: {article: CombinedArt
                 <Stack spacing={2}>
                     {article.content.map((x) => {
                         return (
-                            <ViewBox key={x.id}>
+                            <ViewBox key={x.id} style={{margin: 'auto', marginTop: '16px'}}>
                                 {generateArticleElement(x)}
                             </ViewBox>
                         );

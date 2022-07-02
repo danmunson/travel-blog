@@ -1,13 +1,19 @@
 /* eslint-disable @next/next/no-img-element */
-import { ImageList, ImageListItem, styled, Typography } from "@mui/material";
+import { ImageList, ImageListItem, Typography } from "@mui/material";
 import React from "react";
 import { ImageData } from "../lib/types";
 import { ExpandedImageModal } from "./Modals";
 import { ClickableImage, EmptyDiv } from "./basics";
+import { paragraphFontFamily } from "../lib/styling";
+
+const pgStyles = {
+    fontFamily: paragraphFontFamily,
+    fontSize: '20px'
+}
 
 export function ViewableParagraph({text}: {text: string}) {
     return (
-        <Typography variant="body1" sx={{whiteSpace: 'pre-line'}}>
+        <Typography variant="body1" sx={{whiteSpace: 'pre-line', ...pgStyles}}>
             {text}
         </Typography>
     );

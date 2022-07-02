@@ -4,9 +4,10 @@ import { ArticleAdminFull } from "../lib/types";
 import { styled } from "@mui/system";
 import { goToArticle } from "../lib/endpoints";
 import { ContentBase } from "./basics";
+import { articleItemBg, articleItemFontFamily } from "../lib/styling";
 
 const ArticleItem = styled(Box)({
-    backgroundColor: '#ECE5E4',
+    backgroundColor: articleItemBg,
     width: '80%',
     flexDirection: 'column',
     alignSelf: 'center',
@@ -20,11 +21,6 @@ const ArticleItem = styled(Box)({
     cursor: 'pointer',
 });
 
-const fontStyles = {
-    fontFamily: 'Georgia',
-    fontSize: '20px'
-};
-
 export function HomeView(articles: ArticleAdminFull[]) {
     return (
         <ContentBase title={"Dan and Lisa's Travels"}>
@@ -36,12 +32,12 @@ export function HomeView(articles: ArticleAdminFull[]) {
                     >
                         <Grid container spacing={2}>
                             <Grid item xs={8}>
-                                <Typography sx={{textAlign: 'left', ...fontStyles}}>
+                                <Typography sx={{textAlign: 'left', fontFamily: articleItemFontFamily, fontSize: '20px'}}>
                                     {article.title}
                                 </Typography>
                             </Grid>
                             <Grid item xs={4}>
-                                <Typography variant="body1" sx={{textAlign: 'right', ...fontStyles}}>
+                                <Typography variant="body1" sx={{textAlign: 'right', fontFamily: articleItemFontFamily, fontSize: '15px'}}>
                                     {datestringFromTimestamp(article.createdTime)}
                                 </Typography>
                             </Grid>

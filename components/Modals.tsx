@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
-import { Button, ButtonGroup, Stack, TextField, Typography } from '@mui/material';
+import { Button, ButtonGroup, CircularProgress, Stack, TextField, Typography } from '@mui/material';
 import { ArticleAdminSummary, ArticleItem, ArticleStatusActions, ImageData } from '../lib/types';
 import React from 'react';
 import { takeArticleAction, editArticleRedirect, adminRedirect } from '../lib/endpoints';
@@ -109,21 +109,27 @@ export function NewArticleModal(
 const imageStyles = {
     marginLeft: 'auto',
     marginRight: 'auto',
-    // margin: 'auto',
     display:'block',
 };
 
+const MemoizedBasicImage = React.memo(BasicImage);
+
 export function ExpandedImageModal(image: ImageData|null, close: () => void) {
     const open = image !== null; // check if image is just {}
+    const [isLoaded, setIsLoaded] = React.useState(false);
+    const onLoad = React.useCallback(() => setIsLoaded(true), []);
     if (!open) return <></>;
     return (
         <BasicStyledModal
             open={open}
-            onClose={close}
+            onClose={() => {setIsLoaded(false); close()}}
         >
             <BasicStyledBox>
-                <EmptyDiv sx={CenteredContentsStyle}>
-                    <BasicImage style={imageStyles} image={image}/>
+                <EmptyDiv sx={{...CenteredContentsStyle, backdropFilter: 'blur(6px)'}}>
+                    <Box sx={{...CenteredContentsStyle, display: !isLoaded ? 'flex' : 'none' }}>
+                        <CircularProgress />
+                    </Box>
+                    <MemoizedBasicImage style={imageStyles} image={image} onLoad={onLoad}/>
                 </EmptyDiv>
             </BasicStyledBox>
         </BasicStyledModal>

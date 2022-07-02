@@ -1,11 +1,12 @@
 /* eslint-disable @next/next/no-img-element */
-import { Box, Modal, Paper, styled, SxProps, Typography } from "@mui/material";
+import { Box, Modal, Paper, styled, Typography } from "@mui/material";
 import React, { HTMLAttributes } from "react";
+import { contentBaseBg, titleFontFamily, universalBg } from "../lib/styling";
 import { compressedUrl } from "../lib/endpoints";
 import { ImageData } from "../lib/types";
 
 export const ViewBox = styled(Box)({
-    width: '80%'
+    width: '80%',
 });
 
 export const EmptyDiv = styled('div')({
@@ -16,19 +17,22 @@ export const EmptyDiv = styled('div')({
 export const Base = styled('div')({
     flexDirection: 'column',
     alignContent: 'center',
+    backgroundColor: universalBg,
+    paddingTop: '20px',
+    height: '100%'
 });
 
 export const StyledBackground = styled(Paper)({
     width: '80%',
     margin: 'auto',
-    backgroundColor: '#B09E9B',
-    padding: '15px'
+    padding: '15px',
+    backgroundColor: contentBaseBg,
 });
 
 export const ContentBase = ({title, children}: React.PropsWithChildren<{title: string}>) => {
     return (
         <Base>
-            <Typography variant="h2" component="div" gutterBottom sx={{textAlign: 'center', fontFamily: 'Copperplate'}}>
+            <Typography variant="h2" component="div" gutterBottom sx={{textAlign: 'center', fontFamily: titleFontFamily}}>
                 {title}
             </Typography>
             <StyledBackground>
@@ -39,10 +43,17 @@ export const ContentBase = ({title, children}: React.PropsWithChildren<{title: s
 }
 
 type ImgStyles = HTMLAttributes<'img'>['style'];
-type ImgParams = {image: ImageData, className?: string, style?: ImgStyles, asCompressed?: boolean};
+type ImgParams = {
+    image: ImageData,
+    className?: string,
+    style?: ImgStyles,
+    asCompressed?: boolean,
+    onLoad?: () => void,
+};
 
-export const BasicImage = ({image, className, style, asCompressed}: ImgParams) => {
+export const BasicImage = ({image, className, style, asCompressed, onLoad}: ImgParams) => {
     const url = asCompressed ? compressedUrl(image.url) : image.url;
+    const cb = onLoad || (() => {});
     return (
         <img
             className={className}
@@ -50,6 +61,7 @@ export const BasicImage = ({image, className, style, asCompressed}: ImgParams) =
             alt={image.name}
             loading="lazy"
             style={{...style, maxWidth: '100%', maxHeight: '100%'}}
+            onLoad={cb}
         />
     );
 }
