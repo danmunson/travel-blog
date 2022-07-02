@@ -33,7 +33,6 @@ async function apiUploadArticle(req: NextApiRequest, res: NextApiResponse) {
             saveMediaFile(fileInfo.path, fileInfo.originalFilename);
         }
         
-
         for (const item of articleContent) {
             if (item.type === 'slideshow') {
                 // path never changes

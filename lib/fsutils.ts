@@ -1,12 +1,14 @@
-import { readFileSync, writeFileSync, renameSync } from "fs";
+import { readFileSync, writeFileSync, renameSync, existsSync } from "fs";
 import {join} from 'path';
 import { AdminFile, ArticleAdminFull, ArticleAdminSummary, ArticleContent, CombinedArticle } from "./types";
 import { createHash } from "crypto";
+import { resizeImage } from "./images";
 
 const {DATA_DIRECTORY} = process.env;
 const AdminFilePath = join(DATA_DIRECTORY!, 'admin.json');
 const ContentDirectory = join(DATA_DIRECTORY!, 'content');
 const MediaDirectory = join(DATA_DIRECTORY!, 'media');
+const CompressedMediaDirectory = join(DATA_DIRECTORY!, 'compressed-media');
 
 function filenameFromTitle(title: string) {
     const hash = createHash('md5').update(title).digest('hex').toString();
@@ -82,13 +84,35 @@ export function updateArticleMetadata(title: string, updateProps: Partial<Articl
     ReadOnlyDb.build();
 }
 
+async function tryCompressFile(filename: string) {
+    const currentPath = join(MediaDirectory, filename);
+    const compressedPath = join(CompressedMediaDirectory, filename);
+    try {
+        console.log(`Attempting to compress ${filename}`);
+        await resizeImage(currentPath, compressedPath);
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+function getCompressedPath(filename: string) {
+    const compressedPath = join(CompressedMediaDirectory, filename);
+    if (existsSync(compressedPath)) return compressedPath;
+    else return undefined;
+}
+
 export function saveMediaFile(currentPath: string, filename: string) {
     const newPath = join(MediaDirectory, filename);
     renameSync(currentPath, newPath);
+    tryCompressFile(filename);
 }
 
-export function readMediaFile(filename: string) {
-    return readFileSync(join(MediaDirectory, filename));
+export function readMediaFile(filename: string, compressed = false) {
+    let path = join(MediaDirectory, filename);
+    if (compressed) {
+        path = getCompressedPath(filename) || path;
+    }
+    return readFileSync(path);
 }
 
 class ReadOnlyArticleDb {

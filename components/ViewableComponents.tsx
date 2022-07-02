@@ -3,11 +3,11 @@ import { ImageList, ImageListItem, styled, Typography } from "@mui/material";
 import React from "react";
 import { ImageData } from "../lib/types";
 import { ExpandedImageModal } from "./Modals";
-import { ClickableImage, ViewBox, EmptyDiv } from "./basics";
+import { ClickableImage, EmptyDiv } from "./basics";
 
 export function ViewableParagraph({text}: {text: string}) {
     return (
-        <Typography variant="body1">
+        <Typography variant="body1" sx={{whiteSpace: 'pre-line'}}>
             {text}
         </Typography>
     );
@@ -20,7 +20,7 @@ export function ViewableImages({images}: {images: ImageData[]}) {
             <ImageList variant="masonry" cols={3} gap={10}>
                 {images.map((image) => (
                     <ImageListItem key={image.url} onClick={() => setExpandedImage(image)}>
-                        <ClickableImage image={image} width={'250px'}/>
+                        <ClickableImage image={image} asCompressed={true}/>
                     </ImageListItem>
                 ))}
             </ImageList>

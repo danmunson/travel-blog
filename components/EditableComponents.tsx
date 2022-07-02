@@ -4,7 +4,6 @@ import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
-import Image from 'next/image';
 import Button from '@mui/material/Button';
 import { ArticleItem, EditState, ImageData } from '../lib/types';
 import {ControlPanel, EditableExpandedImageModal} from './Modals';
@@ -100,13 +99,12 @@ export function MasonryImageListUpload(
     itemIdRef: React.MutableRefObject<string|null>,
 ) {
     return (<>
-        <Box sx={{ width: 1000, height: 450, overflowY: 'scroll' }}>
+        <Box sx={{ width: 1000, overflowY: 'scroll' }}>
             <ImageList variant="masonry" cols={3} gap={8}>
                 {item.images.map((image) => (
                     <MemoizedImageListItem key={image.url} onClick={() => setExpandedImage(image)}>
                         <ClickableImage
                             image={image}
-                            width={'250px'}
                         />
                     </MemoizedImageListItem>
                 ))}
@@ -275,7 +273,7 @@ export function ContentCreationGroup(
             <ButtonGroup>
                 <Button onClick={() => insertNewParagraph()}>New Paragraph</Button>
                 <Button onClick={() => insertNewImageSet()}>New Slideshow</Button>
-                <Button onClick={() => upload(editState)}>Upload</Button>
+                <Button onClick={() => upload(editState)}>Save</Button>
             </ButtonGroup>
             {
                 ControlPanel(

@@ -123,7 +123,7 @@ export function ExpandedImageModal(image: ImageData|null, close: () => void) {
         >
             <BasicStyledBox>
                 <EmptyDiv sx={CenteredContentsStyle}>
-                    <BasicImage style={imageStyles} image={image} width={'500px'}/>
+                    <BasicImage style={imageStyles} image={image}/>
                 </EmptyDiv>
             </BasicStyledBox>
         </BasicStyledModal>
@@ -144,10 +144,10 @@ export function EditableExpandedImageModal(
             open={open}
             onClose={closeFn}
         >
-            <BasicStyledBox>
+            <BasicStyledBox sx={{height: '60%', width: '60%'}}>
                 <EmptyDiv sx={CenteredContentsStyle}>
                     <Stack spacing={4}>
-                        <BasicImage style={imageStyles} image={image} width={'500px'}/>
+                        <BasicImage style={imageStyles} image={image}/>
                         <Button onClick={() => {removeImage(); closeFn()}} style={{backgroundColor: 'red'}}>Delete</Button>
                     </Stack>
                 </EmptyDiv>
@@ -183,8 +183,10 @@ export function ControlPanel(
 
 export function UploadProgressDisplay(uploadProgress: number) {
     return (
-        <Modal open={uploadProgress > 0}>
-            <h1>{`Progress: ${uploadProgress}`}</h1>
-        </Modal>
+        <BasicStyledModal open={uploadProgress > 0}>
+            <BasicStyledBox sx={{backgroundColor: 'white', width: '50%', height: '50%'}}>
+                <h1>{`Progress: ${uploadProgress}`}</h1>
+            </BasicStyledBox>
+        </BasicStyledModal>
     );
 }

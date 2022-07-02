@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { Box, Modal, Paper, styled, SxProps, Typography } from "@mui/material";
 import React, { HTMLAttributes } from "react";
+import { compressedUrl } from "../lib/endpoints";
 import { ImageData } from "../lib/types";
 
 export const ViewBox = styled(Box)({
@@ -38,16 +39,17 @@ export const ContentBase = ({title, children}: React.PropsWithChildren<{title: s
 }
 
 type ImgStyles = HTMLAttributes<'img'>['style'];
+type ImgParams = {image: ImageData, className?: string, style?: ImgStyles, asCompressed?: boolean};
 
-export const BasicImage = ({image, width, className, style}: {image: ImageData, width: string, className?: string, style?: ImgStyles}) => {
+export const BasicImage = ({image, className, style, asCompressed}: ImgParams) => {
+    const url = asCompressed ? compressedUrl(image.url) : image.url;
     return (
         <img
             className={className}
-            src={image.url}
+            src={url}
             alt={image.name}
-            width={width}
             loading="lazy"
-            style={style}
+            style={{...style, maxWidth: '100%', maxHeight: '100%'}}
         />
     );
 }

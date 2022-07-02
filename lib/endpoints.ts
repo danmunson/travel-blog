@@ -27,8 +27,12 @@ export function goHome() {
     Router.push('/');
 }
 
-export function uniqueImageId(image: ImageData){ 
+export function uniqueImageId(image: ImageData) { 
     return `${image.size.toString()}-${image.name}`;
+}
+
+export function compressedUrl(url: string) {
+    return `${url}?compressed=true`
 }
 
 export async function uploadArticle(
