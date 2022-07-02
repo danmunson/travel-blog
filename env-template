@@ -1,0 +1,8 @@
+# long random string, 50-60 chars long
+SECRET_COOKIE_PASSWORD=
+
+#sha256 of password, with 0x prefix
+ADMIN_SHA256=
+
+# root where data is stored
+DATA_DIRECTORY=

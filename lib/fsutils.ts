@@ -5,12 +5,12 @@ import { createHash } from "crypto";
 import { resizeImage } from "./images";
 
 const {DATA_DIRECTORY} = process.env;
-const AdminFilePath = join(DATA_DIRECTORY!, 'admin.json');
-const ContentDirectory = join(DATA_DIRECTORY!, 'content');
-const MediaDirectory = join(DATA_DIRECTORY!, 'media');
-const CompressedMediaDirectory = join(DATA_DIRECTORY!, 'compressed-media');
+export const AdminFilePath = join(DATA_DIRECTORY!, 'admin.json');
+export const ContentDirectory = join(DATA_DIRECTORY!, 'content');
+export const MediaDirectory = join(DATA_DIRECTORY!, 'media');
+export const CompressedMediaDirectory = join(DATA_DIRECTORY!, 'compressed-media');
 
-function filenameFromTitle(title: string) {
+export function filenameFromTitle(title: string) {
     const hash = createHash('md5').update(title).digest('hex').toString();
     const escapedName = title.replace(/(\W+)/gi, '');
     return `${escapedName}-${hash}.json`;
@@ -95,7 +95,7 @@ async function tryCompressFile(filename: string) {
     }
 }
 
-function getCompressedPath(filename: string) {
+export function getCompressedPath(filename: string) {
     const compressedPath = join(CompressedMediaDirectory, filename);
     if (existsSync(compressedPath)) return compressedPath;
     else return undefined;
@@ -116,8 +116,8 @@ export function readMediaFile(filename: string, compressed = false) {
 }
 
 class ReadOnlyArticleDb {
-    private articles!: Map<string, ArticleAdminFull>;
-    private content!: Map<string, ArticleContent>
+    public articles!: Map<string, ArticleAdminFull>;
+    public content!: Map<string, ArticleContent>
     
     constructor() {
         this.build();
