@@ -32,7 +32,7 @@ export function HomeView(articles: ArticleAdminFull[]) {
                     >
                         <Grid container spacing={2}>
                             <Grid item xs={8}>
-                                <Typography sx={{textAlign: 'left', fontFamily: articleItemFontFamily, fontSize: '20px'}}>
+                                <Typography sx={{textAlign: 'left', fontFamily: articleItemFontFamily, fontSize: '23px'}}>
                                     {article.title}
                                 </Typography>
                             </Grid>

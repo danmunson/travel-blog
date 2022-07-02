@@ -25,6 +25,7 @@ export const Base = styled('div')({
 export const StyledBackground = styled(Paper)({
     width: '80%',
     margin: 'auto',
+    marginBottom: '20px',
     padding: '15px',
     backgroundColor: contentBaseBg,
 });
@@ -35,7 +36,7 @@ export const ContentBase = ({title, children}: React.PropsWithChildren<{title: s
             <Typography variant="h2" component="div" gutterBottom sx={{textAlign: 'center', fontFamily: titleFontFamily}}>
                 {title}
             </Typography>
-            <StyledBackground>
+            <StyledBackground elevation={5}>
                 {children}
             </StyledBackground>
         </Base>
