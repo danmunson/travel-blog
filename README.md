@@ -1,34 +1,22 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+This is a basic blog implementation, supporting text and photos.
 
-## Getting Started
+## Features
+- Password-protected admin dashboard for creating and managing blog posts
+- Simple persistence model based on JSON files
+- Image resizing for faster "thumbnail" performance
 
-First, run the development server:
+## Setup
+1. Clone the repo to your machine and install dependencies: `npm i`
+2. Create the directory structure needed for persistence: `cp -r blogdata-template .blogdata`
+3. Create the environment file: `cp env-template .env.local`
+4. Smash the keybord or do whatever you need to in order to set `SECRET_COOKIE_PASSWORD` to random value
+5. Pick a password and generate its SHA256 hash: `npm run hash-pwd -- "your password"`
+6. Set `ADMIN_SHA256` variable in `.env.local`
+7. Set the `DATA_DIRECTORY` variable to the FULL path to your `.blogdata` directory
+8. Generate a build using `npm run build`
+9. To run your server, just run `npm run start`
 
-```bash
-npm run dev
-# or
-yarn dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
-
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
-
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## Running
+Note that "deletions" are performed by dereferencing at the level of the JSON files.
+In order to free up space on your machine by actually deleting the files that have
+been derefenced, run `npm run garbage-collector`
