@@ -56,8 +56,6 @@ export function newArticle(title: string) {
 
     adminFile.articles.push(article);
     writeAdminFile(adminFile);
-
-    ReadOnlyDb.build();
     return;
 }
 
@@ -68,8 +66,6 @@ export function deleteArticleMetadata(title: string) {
     }
     adminFile.articles = adminFile.articles.filter(article => article.title !== title);
     writeAdminFile(adminFile);
-
-    ReadOnlyDb.build();
 }
 
 export function updateArticleMetadata(title: string, updateProps: Partial<ArticleAdminSummary>) {
@@ -80,8 +76,6 @@ export function updateArticleMetadata(title: string, updateProps: Partial<Articl
     }
     Object.assign(article, updateProps);
     writeAdminFile(adminFile);
-
-    ReadOnlyDb.build();
 }
 
 async function tryCompressFile(filename: string) {
@@ -115,40 +109,31 @@ export function readMediaFile(filename: string, compressed = false) {
     return readFileSync(path);
 }
 
-class ReadOnlyArticleDb {
-    public articles!: Map<string, ArticleAdminFull>;
-    public content!: Map<string, ArticleContent>
-    
-    constructor() {
-        this.build();
+export class ReadOnlyDb {
+    static hasArticle(title: string) {
+        const adminFile = getAdminFileCopy();
+        return adminFile.articles.findIndex((item) => item.title === title) >= 0;
     }
 
-    public build() {
-        this.articles = new Map();
-        this.content = new Map();
+    static getPublishedArticleSummaries() {
+        const adminFile = getAdminFileCopy();
+        return adminFile.articles.filter((item) => item.published);
+    }
+
+    static getArticle(title: string): CombinedArticle {
+        const adminFile = getAdminFileCopy();
+        const articleItem = adminFile.articles.find((item) => item.title === title)!;
+        const content = getArticleContent(articleItem.filename)!;
+        return {...articleItem, content};
+    }
+
+    static getAllContent() {
+        const contentMap = new Map();
         const adminFile = getAdminFileCopy();
         for (const item of adminFile.articles) {
-            this.articles.set(item.title, item);
             const content = getArticleContent(item.filename);
-            this.content.set(item.title, content);
+            contentMap.set(item.title, content);
         }
-    }
-
-    hasArticle(title: string) {
-        return this.articles.has(title) && this.content.has(title);
-    }
-    
-    getPublishedArticleSummaries() {
-        const allArticles = [...this.articles.values()];
-        return allArticles.filter((item) => item.published);
-    }
-
-    getArticle(title: string): CombinedArticle {
-        if (!this.hasArticle(title)) throw new Error(`No such article ${title}`);
-        const summary = this.articles.get(title)!;
-        const content = this.content.get(title)!;
-        return {...summary, content};
+        return contentMap;
     }
 }
-
-export const ReadOnlyDb = new ReadOnlyArticleDb();

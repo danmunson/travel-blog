@@ -26,7 +26,7 @@ function getLiveArticleFilePaths() {
 }
 
 function getLiveMediaFilePaths() {
-    const allContent = [...ReadOnlyDb.content.values()];
+    const allContent = [...ReadOnlyDb.getAllContent().values()];
     const allSlideshows = allContent.flat().filter(({type}) => type === 'slideshow') as Array<Slideshow & {id: string}>;
     const allImageNames = allSlideshows.flatMap(({images}) => images).map(({url}) => url.split('/api/image/')[1]);
     const regularMediaPaths = allImageNames.map((name) => join(MediaDirectory, name));
