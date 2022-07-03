@@ -1,5 +1,7 @@
 # long random string, 50-60 chars long
 SECRET_COOKIE_PASSWORD=
+# only uncomment if you are using HTTPS
+# SESSION_RESTRICTION=secure
 
 #sha256 of password, with 0x prefix
 ADMIN_SHA256=

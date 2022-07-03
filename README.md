@@ -13,8 +13,9 @@ This is a basic blog implementation, supporting text and photos.
 5. Pick a password and generate its SHA256 hash: `npm run hash-pwd -- "your password"`
 6. Set `ADMIN_SHA256` variable in `.env.local`
 7. Set the `DATA_DIRECTORY` variable to the FULL path to your `.blogdata` directory
-8. Generate a build using `npm run build`
-9. To run your server, just run `npm run start`
+8. If you're using HTTPS for your website, uncomment the `SESSION_RESTRICTION` variable
+9. Generate a build using `npm run build`
+10. To run your server, just run `npm run start`
 
 ## Running
 Note that "deletions" are performed by dereferencing at the level of the JSON files.
@@ -27,3 +28,4 @@ been derefenced, run `npm run garbage-collector`
     |-- content/
     |-- media/
     |-- compressed-media/
+

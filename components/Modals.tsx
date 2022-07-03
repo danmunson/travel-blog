@@ -188,10 +188,11 @@ export function ControlPanel(
 }
 
 export function UploadProgressDisplay(uploadProgress: number) {
+    const progressAsPercentage = Math.round(uploadProgress * 100).toString();
     return (
         <BasicStyledModal open={uploadProgress > 0}>
             <BasicStyledBox sx={{backgroundColor: 'white', width: '50%', height: '50%'}}>
-                <h1>{`Progress: ${uploadProgress}`}</h1>
+                <h1>{`Progress: ${progressAsPercentage}%`}</h1>
             </BasicStyledBox>
         </BasicStyledModal>
     );

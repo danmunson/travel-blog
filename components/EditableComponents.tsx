@@ -105,6 +105,7 @@ export function MasonryImageListUpload(
                     <MemoizedImageListItem key={image.url} onClick={() => setExpandedImage(image)}>
                         <ClickableImage
                             image={image}
+                            asCompressed={image.url.indexOf('/api/image/') >= 0} // only used compressed if image is on server
                         />
                     </MemoizedImageListItem>
                 ))}
