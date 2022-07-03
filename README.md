@@ -7,7 +7,7 @@ This is a basic blog implementation, supporting text and photos.
 
 ## Setup
 1. Clone the repo to your machine and install dependencies: `npm i`
-2. Create the directory structure needed for persistence: `cp -r blogdata-template .blogdata`
+2. Create the directory structure needed for persistence: `bash setup-persistence.sh` (you should get a directory structure that matches the one described below)
 3. Create the environment file: `cp env-template .env.local`
 4. Smash the keybord or do whatever you need to in order to set `SECRET_COOKIE_PASSWORD` to random value
 5. Pick a password and generate its SHA256 hash: `npm run hash-pwd -- "your password"`
@@ -20,3 +20,10 @@ This is a basic blog implementation, supporting text and photos.
 Note that "deletions" are performed by dereferencing at the level of the JSON files.
 In order to free up space on your machine by actually deleting the files that have
 been derefenced, run `npm run garbage-collector`
+
+## Persistence Structure
+.blogdata/
+    |-- admin.json
+    |-- content/
+    |-- media/
+    |-- compressed-media/
