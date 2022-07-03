@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "start80": "next start -p 80",
     "lint": "next lint",
     "hash-pwd": "node --loader ts-node/esm ./scripts/hash-pwd.ts",
     "garbage-collector": "node --loader ts-node/esm ./scripts/garbage-collector.ts"
